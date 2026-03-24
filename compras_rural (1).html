@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ellus Agropecuária — Controle de Compras</title>
+<style>
+  :root {
+    --verde: #1D6A47;
+    --verde-claro: #E8F5EE;
+    --verde-medio: #2E8B5A;
+    --amarelo: #BA7517;
+    --amarelo-claro: #FFF8EC;
+    --vermelho: #C0392B;
+    --vermelho-claro: #FDEEEC;
+    --azul: #185FA5;
+    --cinza: #F5F4F0;
+    --cinza-borda: #D8D6CE;
+    --texto: #1A1A18;
+    --texto2: #5A5855;
+    --branco: #FFFFFF;
+    --raio: 12px;
+    --raio-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #EFEDE6;
+    min-height: 100vh;
+    color: var(--texto);
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--verde);
+    color: #fff;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+  .header .sub { font-size: 11px; opacity: 0.75; margin-top: 1px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .badge-notif {
+    background: #E74C3C;
+    color: #fff;
+    border-radius: 50%;
+    width: 20px; height: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .btn-gestor {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .btn-gestor.ativo { background: #fff; color: var(--verde); font-weight: 600; }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    background: var(--branco);
+    border-bottom: 1px solid var(--cinza-borda);
+    overflow-x: auto;
+  }
+  .tab {
+    flex: 1;
+    min-width: 80px;
+    padding: 10px 8px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--texto2);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  .tab.ativo { color: var(--verde); border-bottom-color: var(--verde); }
+
+  /* ── MAIN ── */
+  .main { padding: 16px; max-width: 600px; margin: 0 auto; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--branco);
+    border-radius: var(--raio);
+    border: 1px solid var(--cinza-borda);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .card-title { font-size: 15px; font-weight: 600; }
+  .card-sub { font-size: 12px; color: var(--texto2); margin-top: 2px; }
+
+  /* ── STATUS BADGES ── */
+  .status {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .status.pendente    { background: #FFF3CD; color: #856404; }
+  .status.aprovado    { background: #D4EDDA; color: #155724; }
+  .status.rejeitado   { background: #F8D7DA; color: #721C24; }
+  .status.cotando     { background: #CCE5FF; color: #004085; }
+  .status.concluido   { background: #D4EDDA; color: #155724; }
+  .status.aguard-cot  { background: #E2D9F3; color: #432874; }
+
+  /* ── FORM ── */
+  .form-group { margin-bottom: 14px; }
+  label { font-size: 13px; font-weight: 500; display: block; margin-bottom: 5px; color: var(--texto2); }
+  input[type=text], input[type=number], input[type=password],
+  select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--cinza-borda);
+    border-radius: var(--raio-sm);
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--texto);
+    background: var(--cinza);
+    transition: border 0.15s;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--verde);
+    background: #fff;
+  }
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: var(--raio-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--verde); color: #fff; width: 100%; }
+  .btn-outline { background: transparent; border: 1.5px solid var(--verde); color: var(--verde); }
+  .btn-danger  { background: var(--vermelho); color: #fff; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-whatsapp { background: #25D366; color: #fff; }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* ── ETAPAS VISUAIS ── */
+  .etapas {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .etapa-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 50px;
+  }
+  .etapa-circulo {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--cinza-borda);
+    background: var(--cinza);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--texto2);
+    position: relative;
+    z-index: 1;
+  }
+  .etapa-circulo.ativo   { border-color: var(--verde); background: var(--verde); color: #fff; }
+  .etapa-circulo.done    { border-color: var(--verde-medio); background: var(--verde-medio); color: #fff; }
+  .etapa-circulo.bloq    { border-color: var(--amarelo); background: var(--amarelo-claro); color: var(--amarelo); }
+  .etapa-label { font-size: 9px; color: var(--texto2); text-align: center; margin-top: 3px; max-width: 50px; }
+  .etapa-linha { flex: 1; height: 2px; background: var(--cinza-borda); margin: 0 -4px; margin-bottom: 16px; }
+  .etapa-linha.done { background: var(--verde-medio); }
+
+  /* ── PEDIDO CARD ── */
+  .pedido-card {
+    background: var(--branco);
+    border: 1px solid var(--cinza-borda);
+    border-radius: var(--raio);
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .pedido-card:hover { border-color: var(--verde); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .pedido-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .pedido-info { flex: 1; }
+  .pedido-nome { font-size: 14px; font-weight: 600; }
+  .pedido-meta { font-size: 12px; color: var(--texto2); margin-top: 3px; }
+  .pedido-valor { font-size: 13px; font-weight: 600; color: var(--verde); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex; align-items: flex-end; justify-content: center;
+    z-index: 200;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.aberto { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--branco);
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px 30px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    transform: translateY(40px);
+    transition: transform 0.25s;
+  }
+  .modal-overlay.aberto .modal { transform: translateY(0); }
+  .modal-handle {
+    width: 40px; height: 4px;
+    background: var(--cinza-borda);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+  .modal-titulo { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+
+  /* ── RESUMO COTAÇÃO ── */
+  .cotacao-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cotacao-table th { text-align: left; padding: 6px 8px; color: var(--texto2); font-weight: 500; border-bottom: 1px solid var(--cinza-borda); }
+  .cotacao-table td { padding: 8px; border-bottom: 1px solid var(--cinza); }
+  .cotacao-table .melhor { background: var(--verde-claro); font-weight: 600; color: var(--verde); border-radius: 4px; }
+  .cotacao-table .radio-col { width: 30px; text-align: center; }
+
+  /* ── NOTIFICAÇÃO PUSH ── */
+  .notif-banner {
+    background: var(--verde);
+    color: #fff;
+    border-radius: var(--raio);
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(29,106,71,0.3);
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .notif-icon { font-size: 22px; flex-shrink: 0; }
+  .notif-text { flex: 1; }
+  .notif-text strong { font-size: 13px; display: block; }
+  .notif-text span { font-size: 12px; opacity: 0.85; }
+  .notif-x { font-size: 18px; opacity: 0.7; cursor: pointer; }
+
+  /* ── URGENCIA CHIP ── */
+  .urgencia { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+  .urgencia.alta   { background: #FDECEA; color: var(--vermelho); }
+  .urgencia.media  { background: #FFF3CD; color: #856404; }
+  .urgencia.baixa  { background: #E8F5EE; color: var(--verde); }
+
+  /* ── SEÇÃO VAZIA ── */
+  .empty { text-align: center; padding: 40px 20px; color: var(--texto2); }
+  .empty .emoji { font-size: 40px; margin-bottom: 10px; }
+
+  /* ── GESTOR VIEW ── */
+  .gestor-card {
+    background: var(--amarelo-claro);
+    border: 1px solid #EAC97A;
+    border-radius: var(--raio);
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .gestor-card h3 { font-size: 14px; color: var(--amarelo); margin-bottom: 4px; }
+  .gestor-card p  { font-size: 13px; color: var(--texto2); }
+
+  /* ── METRIC ── */
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+  .metric { background: var(--branco); border: 1px solid var(--cinza-borda); border-radius: var(--raio-sm); padding: 12px 10px; text-align: center; }
+  .metric-num { font-size: 22px; font-weight: 700; color: var(--verde); }
+  .metric-lbl { font-size: 11px; color: var(--texto2); margin-top: 2px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid var(--cinza-borda); margin: 14px 0; }
+
+  .section-title { font-size: 13px; font-weight: 600; color: var(--texto2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+
+  /* ── PASSWORD DOTS ── */
+  .pin-dots { display: flex; gap: 10px; justify-content: center; margin: 16px 0; }
+  .pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--cinza-borda); background: transparent; transition: background 0.1s; }
+  .pin-dot.filled { background: var(--verde); border-color: var(--verde); }
+  .pin-numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+  .pin-btn {
+    padding: 16px;
+    background: var(--cinza);
+    border: 1px solid var(--cinza-borda);
+    border-radius: var(--raio-sm);
+    font-size: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.1s;
+  }
+  .pin-btn:active { background: var(--verde-claro); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div style="display:flex;align-items:center;gap:10px">
+    <img src="data:image/png;base64,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" alt="Ellus Logo" style="width:38px;height:38px;object-fit:contain;background:#fff;border-radius:50%;padding:3px;flex-shrink:0;">
+    <div>
+      <div style="font-size:17px;font-weight:700;letter-spacing:-0.3px;line-height:1.1">Ellus Agropecuária</div>
+      <div class="sub">Controle de Compras</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="badge-notif" id="badgeNotif" onclick="abrirNotificacoes()" title="Notificações pendentes">2</div>
+    <button class="btn-gestor" id="btnGestor" onclick="toggleModoGestor()">👤 Gestor</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab ativo" onclick="trocarAba('pedidos')" id="tab-pedidos">📋 Pedidos</div>
+  <div class="tab" onclick="trocarAba('novo')" id="tab-novo">➕ Novo</div>
+  <div class="tab" onclick="trocarAba('cotacoes')" id="tab-cotacoes">💰 Cotações</div>
+  <div class="tab" onclick="trocarAba('relatorio')" id="tab-relatorio">📊 Relatório</div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main" id="mainContent">
+  <!-- ABA PEDIDOS -->
+  <div id="aba-pedidos">
+    <div id="notifArea"></div>
+
+    <!-- Modo Gestor ativo -->
+    <div id="gestorBanner" style="display:none" class="gestor-card">
+      <h3>🔐 Modo Gestor ativo</h3>
+      <p>Você pode aprovar e rejeitar pedidos e cotações.</p>
+    </div>
+
+    <div class="section-title">Pedidos em andamento</div>
+
+    <!-- PEDIDO 1 -->
+    <div class="pedido-card" onclick="abrirPedido(1)">
+      <div class="pedido-row">
+        <div class="pedido-info">
+          <div class="pedido-nome">Óleo hidráulico 68 — 20L</div>
+          <div class="pedido-meta">João Silva · Manutenção · 23/03/2025</div>
+          <div style="margin-top:5px; display:flex; gap:6px; flex-wrap:wrap;">
+            <span class="status aguard-cot">Aguard. cotação</span>
+            <span class="urgencia alta">🔴 Alta</span>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="pedido-valor">R$ —</div>
+          <div style="font-size:11px;color:var(--texto2);margin-top:3px">etapa 3/6</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PEDIDO 2 -->
+    <div class="pedido-card" onclick="abrirPedido(2)">
+      <div class="pedido-row">
+        <div class="pedido-info">
+          <div class="pedido-nome">Herbicida Roundup — 5L × 4</div>
+          <div class="pedido-meta">Maria Lima · Insumos · 22/03/2025</div>
+          <div style="margin-top:5px; display:flex; gap:6px; flex-wrap:wrap;">
+            <span class="status cotando">Em cotação</span>
+            <span class="urgencia media">🟡 Média</span>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="pedido-valor">R$ 480</div>
+          <div style="font-size:11px;color:var(--texto2);margin-top:3px">etapa 4/6</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PEDIDO 3 -->
+    <div class="pedido-card" onclick="abrirPedido(3)">
+      <div class="pedido-row">
+        <div class="pedido-info">
+          <div class="pedido-nome">Parafuso M12 × 50 — cento</div>
+          <div class="pedido-meta">Pedro Souza · Peças · 20/03/2025</div>
+          <div style="margin-top:5px; display:flex; gap:6px; flex-wrap:wrap;">
+            <span class="status aprovado">✅ Concluído</span>
+            <span class="urgencia baixa">🟢 Baixa</span>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="pedido-valor">R$ 94</div>
+          <div style="font-size:11px;color:var(--texto2);margin-top:3px">etapa 6/6</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PEDIDO 4 (rejeitado) -->
+    <div class="pedido-card" onclick="abrirPedido(4)">
+      <div class="pedido-row">
+        <div class="pedido-info">
+          <div class="pedido-nome">Filtro de ar trator New Holland</div>
+          <div class="pedido-meta">Carlos Lima · Manutenção · 19/03/2025</div>
+          <div style="margin-top:5px; display:flex; gap:6px; flex-wrap:wrap;">
+            <span class="status rejeitado">❌ Rejeitado</span>
+            <span class="urgencia baixa">🟢 Baixa</span>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="pedido-valor">—</div>
+          <div style="font-size:11px;color:var(--texto2);margin-top:3px">etapa 3/6</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-whatsapp" style="margin-top:4px" onclick="enviarWhatsApp()">
+      📲 Compartilhar link no WhatsApp
+    </button>
+  </div>
+
+  <!-- ABA NOVO PEDIDO -->
+  <div id="aba-novo" style="display:none">
+    <div class="card">
+      <div class="section-title" style="margin-bottom:14px">📝 Novo Pedido de Compra</div>
+
+      <!-- Etapas visuais -->
+      <div class="etapas" id="etapasForm">
+        <div class="etapa-item"><div class="etapa-circulo ativo" id="ec1">1</div><div class="etapa-label">Pedido</div></div>
+        <div class="etapa-linha" id="el1"></div>
+        <div class="etapa-item"><div class="etapa-circulo" id="ec2">2</div><div class="etapa-label">Justif.</div></div>
+        <div class="etapa-linha" id="el2"></div>
+        <div class="etapa-item"><div class="etapa-circulo" id="ec3">3</div><div class="etapa-label">Aprovação</div></div>
+        <div class="etapa-linha" id="el3"></div>
+        <div class="etapa-item"><div class="etapa-circulo" id="ec4">4</div><div class="etapa-label">Cotação</div></div>
+        <div class="etapa-linha" id="el4"></div>
+        <div class="etapa-item"><div class="etapa-circulo" id="ec5">5</div><div class="etapa-label">Aquisição</div></div>
+      </div>
+
+      <!-- PASSO 1 -->
+      <div id="passo1">
+        <div class="form-group">
+          <label>Seu nome</label>
+          <input type="text" id="solicitante" placeholder="Ex.: João Silva">
+        </div>
+        <div class="form-group">
+          <label>Item a comprar</label>
+          <input type="text" id="item" placeholder="Ex.: Óleo hidráulico 68 — 20L">
+        </div>
+        <div class="form-group">
+          <label>Categoria</label>
+          <select id="categoria">
+            <option value="">Selecione...</option>
+            <option>Insumos agrícolas</option>
+            <option>Peças e manutenção</option>
+            <option>Ferramentas</option>
+            <option>Combustível e lubrificantes</option>
+            <option>Serviços</option>
+            <option>EPI e segurança</option>
+            <option>Outros</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Quantidade</label>
+          <input type="text" id="quantidade" placeholder="Ex.: 2 caixas / 50 kg / 1 unidade">
+        </div>
+        <button class="btn btn-primary" onclick="irPasso(2)">Próximo →</button>
+      </div>
+
+      <!-- PASSO 2 -->
+      <div id="passo2" style="display:none">
+        <div class="form-group">
+          <label>Justificativa da compra</label>
+          <textarea id="justificativa" placeholder="Por que é necessário? Qual o impacto se não for comprado?"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Urgência</label>
+          <select id="urgencia">
+            <option value="baixa">🟢 Baixa — pode aguardar</option>
+            <option value="media">🟡 Média — necessário na semana</option>
+            <option value="alta">🔴 Alta — impede operação</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Observação (opcional)</label>
+          <input type="text" id="obs" placeholder="Marca preferida, especificação técnica...">
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-outline" style="flex:1" onclick="irPasso(1)">← Voltar</button>
+          <button class="btn btn-primary" style="flex:2" onclick="submeterPedido()">📤 Enviar Pedido</button>
+        </div>
+      </div>
+
+      <!-- PASSO 3 (confirmação) -->
+      <div id="passo3" style="display:none;text-align:center;padding:20px 0">
+        <div style="font-size:48px;margin-bottom:10px">✅</div>
+        <div style="font-size:18px;font-weight:700;margin-bottom:8px;color:var(--verde)">Pedido enviado!</div>
+        <div style="font-size:14px;color:var(--texto2);margin-bottom:20px">O gestor foi notificado e receberá um alerta imediato. Você será avisado quando houver resposta.</div>
+        <button class="btn btn-outline" onclick="novoPedido()">Novo pedido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABA COTAÇÕES -->
+  <div id="aba-cotacoes" style="display:none">
+    <div class="gestor-card" id="aviso-cotacao">
+      <h3>💰 Herbicida Roundup — 5L × 4</h3>
+      <p>Registre abaixo os 3 preços consultados. O gestor escolherá o melhor fornecedor.</p>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Fornecedor 1</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group" style="margin:0">
+          <label>Nome</label>
+          <input type="text" id="f1nome" placeholder="Agro Silva" value="Agro Silva Ltda">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Preço total (R$)</label>
+          <input type="number" id="f1preco" placeholder="0,00" value="480">
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:10px">
+        <label>Prazo de entrega</label>
+        <input type="text" id="f1prazo" placeholder="Ex.: 2 dias úteis" value="2 dias úteis">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Fornecedor 2</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group" style="margin:0">
+          <label>Nome</label>
+          <input type="text" id="f2nome" placeholder="Cooperativa..." value="Cooperativa Rural">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Preço total (R$)</label>
+          <input type="number" id="f2preco" placeholder="0,00" value="455">
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:10px">
+        <label>Prazo de entrega</label>
+        <input type="text" id="f2prazo" placeholder="Ex.: 1 dia útil" value="4 dias úteis">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Fornecedor 3</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-group" style="margin:0">
+          <label>Nome</label>
+          <input type="text" id="f3nome" placeholder="Distribuidora..." value="AgroMax Dist.">
+        </div>
+        <div class="form-group" style="margin:0">
+          <label>Preço total (R$)</label>
+          <input type="number" id="f3preco" placeholder="0,00" value="510">
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:10px">
+        <label>Prazo de entrega</label>
+        <input type="text" id="f3prazo" placeholder="Ex.: 3 dias úteis" value="1 dia útil">
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="enviarCotacao()">📤 Enviar Cotação ao Gestor</button>
+  </div>
+
+  <!-- ABA RELATÓRIO -->
+  <div id="aba-relatorio" style="display:none">
+    <div class="metrics">
+      <div class="metric"><div class="metric-num">12</div><div class="metric-lbl">Pedidos no mês</div></div>
+      <div class="metric"><div class="metric-num">R$4.2k</div><div class="metric-lbl">Total comprado</div></div>
+      <div class="metric"><div class="metric-num">83%</div><div class="metric-lbl">Taxa aprovação</div></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Economia por cotação</div>
+      <div style="font-size:13px;color:var(--texto2);margin-bottom:10px">Diferença entre preço mais alto e escolhido</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500">Herbicida Roundup</div>
+          <div style="font-size:11px;color:var(--texto2)">Cooperativa Rural — menor preço</div>
+        </div>
+        <div style="color:var(--verde);font-weight:700;font-size:14px">− R$55</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500">Adubo NPK 20-05-20</div>
+          <div style="font-size:11px;color:var(--texto2)">Agro Norte — menor preço</div>
+        </div>
+        <div style="color:var(--verde);font-weight:700;font-size:14px">− R$120</div>
+      </div>
+      <hr class="divider">
+      <div style="display:flex;justify-content:space-between;font-weight:700;font-size:14px">
+        <span>Total economizado no mês</span>
+        <span style="color:var(--verde)">R$ 312</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">Pedidos rejeitados — motivos</div>
+      <div style="font-size:13px;color:var(--texto2)">
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--cinza)"><span>Item já em estoque</span><span style="font-weight:600">2</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--cinza)"><span>Justificativa insuficiente</span><span style="font-weight:600">1</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0"><span>Fora do orçamento</span><span style="font-weight:600">1</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ MODALS ═══════════════════ -->
+
+<!-- Modal: Detalhe do Pedido -->
+<div class="modal-overlay" id="modalPedido">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="modal-titulo" id="modalPedidoTitulo">Detalhe do pedido</div>
+      <span onclick="fecharModal('modalPedido')" style="font-size:22px;cursor:pointer;color:var(--texto2)">✕</span>
+    </div>
+    <div id="modalPedidoConteudo"></div>
+  </div>
+</div>
+
+<!-- Modal: Aprovação com senha (PIN) -->
+<div class="modal-overlay" id="modalSenha">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-titulo">🔐 Autenticação do Gestor</div>
+    <div style="font-size:13px;color:var(--texto2);margin-bottom:12px">Digite o PIN de 4 dígitos para <span id="acaoSenha">aprovar</span> este pedido.</div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+      <div class="pin-dot" id="d4"></div>
+    </div>
+    <div class="pin-numpad">
+      <button class="pin-btn" onclick="pinDigito('1')">1</button>
+      <button class="pin-btn" onclick="pinDigito('2')">2</button>
+      <button class="pin-btn" onclick="pinDigito('3')">3</button>
+      <button class="pin-btn" onclick="pinDigito('4')">4</button>
+      <button class="pin-btn" onclick="pinDigito('5')">5</button>
+      <button class="pin-btn" onclick="pinDigito('6')">6</button>
+      <button class="pin-btn" onclick="pinDigito('7')">7</button>
+      <button class="pin-btn" onclick="pinDigito('8')">8</button>
+      <button class="pin-btn" onclick="pinDigito('9')">9</button>
+      <button class="pin-btn" onclick="pinLimpar()" style="font-size:14px;color:var(--vermelho)">⌫</button>
+      <button class="pin-btn" onclick="pinDigito('0')">0</button>
+      <button class="pin-btn" onclick="fecharModal('modalSenha')" style="font-size:12px;color:var(--texto2)">✕</button>
+    </div>
+    <div id="pinErro" style="color:var(--vermelho);font-size:13px;text-align:center;margin-top:10px;display:none">PIN incorreto. Tente novamente.</div>
+  </div>
+</div>
+
+<!-- Modal: Cotação do Gestor -->
+<div class="modal-overlay" id="modalAprovarCotacao">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="modal-titulo">Escolher Fornecedor</div>
+      <span onclick="fecharModal('modalAprovarCotacao')" style="font-size:22px;cursor:pointer;color:var(--texto2)">✕</span>
+    </div>
+    <div style="font-size:13px;color:var(--texto2);margin-bottom:14px">Herbicida Roundup — 5L × 4. Selecione o fornecedor aprovado:</div>
+    <table class="cotacao-table">
+      <thead><tr><th class="radio-col"></th><th>Fornecedor</th><th>Preço</th><th>Prazo</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="radio-col"><input type="radio" name="forn" value="1" id="r1"></td>
+          <td>Agro Silva</td><td>R$ 480</td><td>2 dias</td>
+        </tr>
+        <tr class="melhor">
+          <td class="radio-col"><input type="radio" name="forn" value="2" id="r2" checked></td>
+          <td>Cooperativa ⭐</td><td>R$ 455</td><td>4 dias</td>
+        </tr>
+        <tr>
+          <td class="radio-col"><input type="radio" name="forn" value="3" id="r3"></td>
+          <td>AgroMax</td><td>R$ 510</td><td>1 dia</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:14px">
+      <label style="font-size:13px">Justificativa da escolha (opcional)</label>
+      <input type="text" style="margin-top:5px" placeholder="Ex.: Menor preço, prazo aceitável" id="justCotacao">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px">
+      <button class="btn btn-danger btn-sm" style="flex:1" onclick="fecharModal('modalAprovarCotacao')">Rejeitar</button>
+      <button class="btn btn-primary" style="flex:2" onclick="solicitarSenha('aprovarCotacao')">🔐 Confirmar aprovação</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Notificações -->
+<div class="modal-overlay" id="modalNotif">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div class="modal-titulo">🔔 Notificações</div>
+      <span onclick="fecharModal('modalNotif')" style="font-size:22px;cursor:pointer;color:var(--texto2)">✕</span>
+    </div>
+    <div class="pedido-card" onclick="abrirPedido(1);fecharModal('modalNotif')">
+      <div style="font-size:12px;color:var(--texto2);margin-bottom:4px">Hoje 14:32</div>
+      <div style="font-size:14px;font-weight:600">🆕 Novo pedido de João Silva</div>
+      <div style="font-size:13px;color:var(--texto2)">Óleo hidráulico 68 — 20L · Urgência alta</div>
+    </div>
+    <div class="pedido-card" onclick="abrirPedido(2);fecharModal('modalNotif')">
+      <div style="font-size:12px;color:var(--texto2);margin-bottom:4px">Hoje 10:15</div>
+      <div style="font-size:14px;font-weight:600">💰 Cotação pronta — Maria Lima</div>
+      <div style="font-size:13px;color:var(--texto2)">Herbicida Roundup — aguardando sua aprovação</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Estado do app ──
+let modoGestor = false;
+let pinAtual = '';
+let acaoPendente = null;
+const PIN_CORRETO = '1234'; // Em produção: salvo com hash no servidor
+
+// ── Navegação de abas ──
+function trocarAba(aba) {
+  ['pedidos','novo','cotacoes','relatorio'].forEach(a => {
+    document.getElementById('aba-'+a).style.display = 'none';
+    document.getElementById('tab-'+a).classList.remove('ativo');
+  });
+  document.getElementById('aba-'+aba).style.display = 'block';
+  document.getElementById('tab-'+aba).classList.add('ativo');
+}
+
+// ── Modo Gestor ──
+function toggleModoGestor() {
+  if (!modoGestor) {
+    solicitarSenha('ativarGestor');
+  } else {
+    modoGestor = false;
+    document.getElementById('btnGestor').classList.remove('ativo');
+    document.getElementById('gestorBanner').style.display = 'none';
+  }
+}
+
+// ── PIN ──
+function solicitarSenha(acao) {
+  acaoPendente = acao;
+  pinAtual = '';
+  atualizarDots();
+  document.getElementById('acaoSenha').textContent = acao === 'aprovar' ? 'aprovar' : acao === 'rejeitar' ? 'rejeitar' : acao === 'aprovarCotacao' ? 'aprovar a cotação' : 'entrar no modo gestor';
+  document.getElementById('pinErro').style.display = 'none';
+  abrirModal('modalSenha');
+}
+
+function pinDigito(d) {
+  if (pinAtual.length >= 4) return;
+  pinAtual += d;
+  atualizarDots();
+  if (pinAtual.length === 4) {
+    setTimeout(verificarPin, 150);
+  }
+}
+
+function pinLimpar() {
+  pinAtual = pinAtual.slice(0, -1);
+  atualizarDots();
+}
+
+function atualizarDots() {
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById('d'+i).classList.toggle('filled', i <= pinAtual.length);
+  }
+}
+
+function verificarPin() {
+  if (pinAtual === PIN_CORRETO) {
+    document.getElementById('pinErro').style.display = 'none';
+    fecharModal('modalSenha');
+    executarAcao(acaoPendente);
+  } else {
+    document.getElementById('pinErro').style.display = 'block';
+    pinAtual = '';
+    atualizarDots();
+  }
+}
+
+function executarAcao(acao) {
+  if (acao === 'ativarGestor') {
+    modoGestor = true;
+    document.getElementById('btnGestor').classList.add('ativo');
+    document.getElementById('gestorBanner').style.display = 'block';
+    mostrarNotifBanner('✅ Modo gestor ativado', 'Você pode aprovar pedidos e cotações');
+  } else if (acao === 'aprovar') {
+    mostrarNotifBanner('✅ Pedido aprovado!', 'Colaborador notificado para iniciar cotação');
+    fecharModal('modalPedido');
+  } else if (acao === 'rejeitar') {
+    mostrarNotifBanner('❌ Pedido rejeitado', 'Colaborador foi notificado');
+    fecharModal('modalPedido');
+  } else if (acao === 'aprovarCotacao') {
+    mostrarNotifBanner('✅ Cotação aprovada!', 'Cooperativa Rural selecionada — R$ 455');
+    fecharModal('modalAprovarCotacao');
+  }
+}
+
+// ── Modais ──
+function abrirModal(id) {
+  document.getElementById(id).classList.add('aberto');
+}
+function fecharModal(id) {
+  document.getElementById(id).classList.remove('aberto');
+}
+
+// ── Detalhes do pedido ──
+const pedidos = {
+  1: {
+    titulo: 'Óleo hidráulico 68 — 20L',
+    status: 'aguard-cot',
+    statusTxt: 'Aguardando cotação',
+    solicitante: 'João Silva',
+    setor: 'Manutenção',
+    data: '23/03/2025',
+    justificativa: 'O sistema hidráulico do trator TM7040 está com baixo nível de óleo após reparo na bomba. Sem reabastecimento, o trator não pode operar na colheita.',
+    urgencia: 'alta',
+    etapa: 3,
+    valor: null
+  },
+  2: {
+    titulo: 'Herbicida Roundup — 5L × 4',
+    status: 'cotando',
+    statusTxt: 'Em cotação',
+    solicitante: 'Maria Lima',
+    setor: 'Insumos',
+    data: '22/03/2025',
+    justificativa: 'Aplicação preventiva de pré-emergência nas lavouras de soja antes das chuvas previstas para semana que vem.',
+    urgencia: 'media',
+    etapa: 4,
+    valor: 455
+  },
+  3: {
+    titulo: 'Parafuso M12 × 50 — cento',
+    status: 'aprovado',
+    statusTxt: 'Concluído',
+    solicitante: 'Pedro Souza',
+    setor: 'Peças',
+    data: '20/03/2025',
+    justificativa: 'Reposição de estoque de fixadores para a oficina. Consumo mensal recorrente.',
+    urgencia: 'baixa',
+    etapa: 6,
+    valor: 94
+  },
+  4: {
+    titulo: 'Filtro de ar trator New Holland',
+    status: 'rejeitado',
+    statusTxt: 'Rejeitado',
+    solicitante: 'Carlos Lima',
+    setor: 'Manutenção',
+    data: '19/03/2025',
+    justificativa: 'Manutenção preventiva.',
+    urgencia: 'baixa',
+    etapa: 3,
+    motivo: 'Item ainda disponível no estoque. Verificar almoxarifado antes de solicitar.'
+  }
+};
+
+function abrirPedido(id) {
+  const p = pedidos[id];
+  const urg = {alta:'🔴 Alta', media:'🟡 Média', baixa:'🟢 Baixa'};
+  const podAprovar = modoGestor && (p.status === 'aguard-cot' || p.status === 'pendente');
+  const podCotacao = modoGestor && p.status === 'cotando';
+
+  let html = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span class="status ${p.status}">${p.statusTxt}</span>
+      <span class="urgencia ${p.urgencia}">${urg[p.urgencia]}</span>
+    </div>
+    <div style="font-size:13px;color:var(--texto2);margin-bottom:10px">
+      👤 ${p.solicitante} · ${p.setor} · ${p.data}
+    </div>
+    <div style="background:var(--cinza);border-radius:var(--raio-sm);padding:12px;font-size:13px;margin-bottom:14px">
+      <strong>Justificativa:</strong><br>${p.justificativa}
+    </div>`;
+
+  if (p.motivo) {
+    html += `<div style="background:var(--vermelho-claro);border-radius:var(--raio-sm);padding:12px;font-size:13px;margin-bottom:14px;color:var(--vermelho)">
+      <strong>Motivo da rejeição:</strong> ${p.motivo}</div>`;
+  }
+
+  if (p.valor) {
+    html += `<div style="font-size:14px;font-weight:600;color:var(--verde);margin-bottom:14px">
+      💰 Valor aprovado: R$ ${p.valor}</div>`;
+  }
+
+  // Etapas
+  const etapas = ['Pedido','Justif.','Aprovação','Cotação','Apr. Cot.','Aquisição'];
+  html += '<div class="etapas" style="margin-bottom:16px">';
+  etapas.forEach((e, i) => {
+    const n = i + 1;
+    let cls = n < p.etapa ? 'done' : n === p.etapa ? 'ativo' : '';
+    html += `<div class="etapa-item"><div class="etapa-circulo ${cls}">${n < p.etapa ? '✓' : n}</div><div class="etapa-label">${e}</div></div>`;
+    if (i < etapas.length - 1) html += `<div class="etapa-linha ${n < p.etapa ? 'done' : ''}"></div>`;
+  });
+  html += '</div>';
+
+  if (podAprovar) {
+    html += `<div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-danger" style="flex:1" onclick="fecharModal('modalPedido');solicitarSenha('rejeitar')">❌ Rejeitar</button>
+      <button class="btn btn-primary" style="flex:2" onclick="fecharModal('modalPedido');solicitarSenha('aprovar')">🔐 Aprovar pedido</button>
+    </div>`;
+  } else if (podCotacao) {
+    html += `<button class="btn btn-primary" onclick="fecharModal('modalPedido');abrirModal('modalAprovarCotacao')">💰 Ver cotações e aprovar</button>`;
+  } else if (!modoGestor && (p.status === 'aguard-cot' || p.status === 'pendente' || p.status === 'cotando')) {
+    html += `<div style="font-size:12px;color:var(--texto2);text-align:center;padding:8px;background:var(--cinza);border-radius:var(--raio-sm)">⚠️ Apenas o gestor pode aprovar pedidos</div>`;
+  }
+
+  document.getElementById('modalPedidoTitulo').textContent = p.titulo;
+  document.getElementById('modalPedidoConteudo').innerHTML = html;
+  abrirModal('modalPedido');
+}
+
+// ── Formulário novo pedido ──
+let passoAtual = 1;
+
+function irPasso(n) {
+  const s = document.getElementById('solicitante').value.trim();
+  const it = document.getElementById('item').value.trim();
+  const cat = document.getElementById('categoria').value;
+  if (n === 2 && (!s || !it || !cat)) {
+    alert('Preencha todos os campos antes de continuar.');
+    return;
+  }
+  document.getElementById('passo'+passoAtual).style.display = 'none';
+  document.getElementById('passo'+n).style.display = 'block';
+  passoAtual = n;
+
+  // Atualiza etapas visuais
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('ec'+i);
+    el.classList.remove('ativo','done');
+    if (i < n) el.classList.add('done'), el.textContent = '✓';
+    else if (i === n) el.classList.add('ativo'), el.textContent = i;
+    else el.textContent = i;
+    if (i < 5) document.getElementById('el'+i)?.classList.toggle('done', i < n);
+  }
+}
+
+function submeterPedido() {
+  const just = document.getElementById('justificativa').value.trim();
+  if (!just) { alert('Descreva a justificativa da compra.'); return; }
+  irPasso(3);
+  // Simula notificação push ao gestor
+  setTimeout(() => {
+    mostrarNotifBanner('📲 Gestor notificado!', 'Push enviado via WhatsApp para aprovação');
+  }, 600);
+  document.getElementById('badgeNotif').textContent = parseInt(document.getElementById('badgeNotif').textContent) + 1;
+}
+
+function novoPedido() {
+  passoAtual = 1;
+  ['solicitante','item','quantidade','obs','justificativa'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('categoria').value = '';
+  document.getElementById('passo3').style.display = 'none';
+  document.getElementById('passo1').style.display = 'block';
+  irPasso(1);
+}
+
+// ── Cotação ──
+function enviarCotacao() {
+  if (!document.getElementById('f1preco').value || !document.getElementById('f2preco').value) {
+    alert('Preencha ao menos 2 fornecedores.');
+    return;
+  }
+  mostrarNotifBanner('📤 Cotação enviada!', 'Gestor foi notificado para escolher o fornecedor');
+  document.getElementById('badgeNotif').textContent = parseInt(document.getElementById('badgeNotif').textContent) + 1;
+}
+
+// ── Notificações ──
+function abrirNotificacoes() { abrirModal('modalNotif'); }
+
+function mostrarNotifBanner(titulo, texto) {
+  const area = document.getElementById('notifArea');
+  const div = document.createElement('div');
+  div.className = 'notif-banner';
+  div.innerHTML = `<div class="notif-icon">🔔</div>
+    <div class="notif-text"><strong>${titulo}</strong><span>${texto}</span></div>
+    <div class="notif-x" onclick="this.parentElement.remove()">✕</div>`;
+  area.insertBefore(div, area.firstChild);
+  setTimeout(() => div.remove(), 6000);
+}
+
+// ── WhatsApp ──
+function enviarWhatsApp() {
+  const url = encodeURIComponent(window.location.href);
+  const msg = encodeURIComponent('🌾 *AgriCompras — Fazenda São João*\nAcesse o sistema de pedidos de compra:\n' + window.location.href);
+  window.open('https://wa.me/?text=' + msg, '_blank');
+}
+
+// ── Fechar modais clicando fora ──
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) fecharModal(el.id); });
+});
+
+// Notificação inicial
+setTimeout(() => {
+  mostrarNotifBanner('🔔 2 pedidos aguardam sua aprovação', 'Toque aqui para revisar');
+}, 800);
+</script>
+</body>
+</html>
